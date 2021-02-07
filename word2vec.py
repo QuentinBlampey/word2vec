@@ -1,4 +1,5 @@
 import numpy as np
+from dataset import SentencesDataset
 
 def softmax(array):
     array = np.exp(array)
@@ -22,19 +23,22 @@ class Word2Vec():
         one_hot[index] = 1
         return one_hot
     
-    def forward(self, index):
-        emb = self.embedding[index,:]
+    def forward(self, indexes):
+        emb = np.zeros(self.embedding_size)
+        for index in indexes:
+            emb += self.embedding[index,:]
+
         return emb, softmax(emb @ self.linear)
     
     def criterion(self, y, output):
         return -1/self.vocab_size*np.inner(y, np.log(output))
     
-    def step(self, input_index, output_index):
+    def step(self, input_indexes, output_index):
         y = self.one_hot_encod(output_index)
-        emb, output = self.forward(input_index)
+        emb, output = self.forward(input_indexes)
 
         loss = self.criterion(y, output)
-        print(f"Loss - {loss:.3f}")
+        # print(f"Loss - {loss:.3f}")
 
         dL_dx = 1/self.vocab_size*(output-y)
 
@@ -42,4 +46,13 @@ class Word2Vec():
         self.linear -= self.learning_rate*grad_linear
 
         grad_embedding = self.linear @ dL_dx
-        self.embedding[input_index,:] -= self.learning_rate*grad_embedding
+        for input_index in input_indexes:
+            self.embedding[input_index,:] -= self.learning_rate*grad_embedding
+
+        return loss
+
+    def step_from_words(self, word, neighbors):
+        output_index = self.word_to_index[word]
+        input_indexes = list(map(lambda w: self.word_to_index[w], neighbors))
+
+        return self.step(input_indexes, output_index)
