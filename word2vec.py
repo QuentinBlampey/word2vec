@@ -5,7 +5,7 @@ def softmax(array):
     return array / np.sum(array, axis=1, keepdims=True)
 
 class Word2Vec():
-    def __init__(self, vocab, embedding_size, learning_rate=1.):
+    def __init__(self, vocab, embedding_size, learning_rate=.1):
         self.vocab = vocab
         self.embedding_size = embedding_size
         self.learning_rate = learning_rate

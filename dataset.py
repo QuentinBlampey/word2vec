@@ -12,27 +12,25 @@ class WordPairsDataset:
         """
         super(WordPairsDataset, self).__init__()
         self.pattern = re.compile(r'[A-Za-z]+[\w^\']*|[\w^\']*[A-Za-z]+[\w^\']*') # Tokens containing an alpha symbol
-        self.padding = window_size // 2
+        self.window_size = window_size
+        self.padding = self.window_size // 2
         
         with open(data_filename, "r") as f:
             self.sentences = [l for l in f]
-
-        self.window_size = window_size
-        self.preprocess()
+            self.preprocess()
         
         self.pairs = []
         for sentence in self.sentences:
             for i, word in enumerate(sentence):
                 for delta in range(-self.padding, self.padding+1):
-                    if delta != 0 and i + delta >= 0 and i + delta < len(sentence):
+                    if delta and i + delta >= 0 and i + delta < len(sentence):
                         self.pairs.append((word, sentence[i + delta]))
                     
-
     def tokenize(self, sentence):
         return self.pattern.findall(sentence.lower())
 
     def preprocess(self):
-        self.sentences = list(map(self.tokenize, self.sentences))
+        self.sentences = map(self.tokenize, self.sentences)
         self.sentences = list(filter(lambda l: len(l) >= self.window_size, self.sentences))
 
     def __len__(self):
