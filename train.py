@@ -19,6 +19,7 @@ if __name__ == "__main__":
     vocab = set(reduce(lambda x,y: x+y, dataset.sentences))
     print(f"> {len(vocab)} words\n")
 
+
     word2vec = Word2Vec(vocab, args.embedding_size, learning_rate=args.lr)
     loader = Loader(dataset, args.batch_size, word2vec.word_to_index)
 

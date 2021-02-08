@@ -6,6 +6,8 @@ def softmax(array):
 
 class Word2Vec():
     def __init__(self, vocab, embedding_size, learning_rate=.1):
+        np.random.seed(0)
+
         self.vocab = vocab
         self.embedding_size = embedding_size
         self.learning_rate = learning_rate
@@ -24,17 +26,14 @@ class Word2Vec():
     
     def forward(self, input_indices):
         embeddings = self.embedding[input_indices, :]
-
         return embeddings, softmax(embeddings @ self.linear)
     
     def criterion(self, y, outputs):
-        return -1/self.vocab_size*np.sum(y*np.log(outputs), axis=1)
+        return -1/self.vocab_size*np.sum(y*np.log(outputs), axis=1).mean()
     
     def step(self, input_indices, output_indices):
         y = self.one_hot_encod(output_indices)
         embeddings, outputs = self.forward(input_indices)
-
-        loss = self.criterion(y, outputs)
 
         dL_dx = 1/self.vocab_size*(outputs-y)
 
@@ -44,4 +43,4 @@ class Word2Vec():
         grad_embedding = dL_dx @ self.linear.T
         self.embedding[input_indices, :] -= self.learning_rate*grad_embedding
 
-        return loss.mean()
+        return self.criterion(y, outputs)

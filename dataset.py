@@ -52,6 +52,11 @@ class Loader:
         return self
 
     def __next__(self):
+        if self.current_index >= len(self.dataset):
+            self.current_index = 0
+            np.random.shuffle(self.dataset.pairs)
+            raise StopIteration
+
         input_indices, output_indices = [], []
         
         for input_word, output_word in self.dataset[self.current_index:self.current_index+self.batch_size]:
@@ -59,8 +64,4 @@ class Loader:
             output_indices.append(self.word_to_index[output_word])
             
         self.current_index += self.batch_size
-        if self.current_index < len(self.dataset):
-            return np.array(input_indices), np.array(output_indices)
-        else:
-            self.current_index = 0
-            raise StopIteration
+        return np.array(input_indices), np.array(output_indices)
