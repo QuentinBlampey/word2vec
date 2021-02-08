@@ -1,9 +1,8 @@
 import numpy as np
-from dataset import SentencesDataset
 
 def softmax(array):
     array = np.exp(array)
-    return array / np.sum(array)
+    return array / np.sum(array, axis=1, keepdims=True)
 
 class Word2Vec():
     def __init__(self, vocab, embedding_size, learning_rate=1.):
@@ -18,41 +17,31 @@ class Word2Vec():
         self.embedding = np.random.randn(self.vocab_size, self.embedding_size)
         self.linear = np.random.randn(self.embedding_size, self.vocab_size)
         
-    def one_hot_encod(self, index):
-        one_hot = np.zeros(self.vocab_size)
-        one_hot[index] = 1
+    def one_hot_encod(self, output_indices):
+        one_hot = np.zeros((len(output_indices), self.vocab_size))
+        one_hot[np.arange(len(output_indices)), output_indices] = 1
         return one_hot
     
-    def forward(self, indexes):
-        emb = np.zeros(self.embedding_size)
-        for index in indexes:
-            emb += self.embedding[index,:]
+    def forward(self, input_indices):
+        embeddings = self.embedding[input_indices, :]
 
-        return emb, softmax(emb @ self.linear)
+        return embeddings, softmax(embeddings @ self.linear)
     
-    def criterion(self, y, output):
-        return -1/self.vocab_size*np.inner(y, np.log(output))
+    def criterion(self, y, outputs):
+        return -1/self.vocab_size*np.sum(y*np.log(outputs), axis=1)
     
-    def step(self, input_indexes, output_index):
-        y = self.one_hot_encod(output_index)
-        emb, output = self.forward(input_indexes)
+    def step(self, input_indices, output_indices):
+        y = self.one_hot_encod(output_indices)
+        embeddings, outputs = self.forward(input_indices)
 
-        loss = self.criterion(y, output)
-        # print(f"Loss - {loss:.3f}")
+        loss = self.criterion(y, outputs)
 
-        dL_dx = 1/self.vocab_size*(output-y)
+        dL_dx = 1/self.vocab_size*(outputs-y)
 
-        grad_linear = np.outer(emb, dL_dx)
+        grad_linear = embeddings.T @ dL_dx
         self.linear -= self.learning_rate*grad_linear
+        
+        grad_embedding = dL_dx @ self.linear.T
+        self.embedding[input_indices, :] -= self.learning_rate*grad_embedding
 
-        grad_embedding = self.linear @ dL_dx
-        for input_index in input_indexes:
-            self.embedding[input_index,:] -= self.learning_rate*grad_embedding
-
-        return loss
-
-    def step_from_words(self, word, neighbors):
-        output_index = self.word_to_index[word]
-        input_indexes = list(map(lambda w: self.word_to_index[w], neighbors))
-
-        return self.step(input_indexes, output_index)
+        return loss.mean()

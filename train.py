@@ -1,26 +1,23 @@
 from functools import reduce
-from torch.utils.data import DataLoader
 
-from word2vec import *
-from dataset import *
+from word2vec import Word2Vec
+from dataset import WordPairsDataset, Loader
 
 data_filename = "example_dataset.txt"
-batch_size = 1 # Must be 1 for now
+batch_size = 4
 n_epochs = 10
 
-sd = SentencesDataset(data_filename)
-loader =  DataLoader(sd, batch_size=batch_size, shuffle=True)
+dataset = WordPairsDataset(data_filename)
 
-words = reduce(lambda x,y: x+y, sd.sentences)
+words = reduce(lambda x,y: x+y, dataset.sentences)
 vocab = set(words)
 embedding_size = 10
 
 word2vec = Word2Vec(vocab, embedding_size)
+loader = Loader(dataset, batch_size, word2vec.word_to_index)
 
 for epoch in range(n_epochs):
     loss = 0
-    for word, neighbors in loader:
-        word = word[0] # CRAPPY
-        neighbors = list(map(lambda x:x[0], neighbors)) # CRAPPY
-        loss += word2vec.step_from_words(word, neighbors)
+    for input_indices, output_indices in loader:
+        loss += word2vec.step(input_indices, output_indices)
     print(f"Loss - {loss:.3f}")
