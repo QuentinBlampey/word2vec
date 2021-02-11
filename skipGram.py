@@ -1,5 +1,4 @@
 from __future__ import division
-from functools import reduce
 import argparse
 import pandas as pd
 import numpy as np
@@ -21,7 +20,7 @@ if __name__ == '__main__':
 	parser.add_argument('--text', help='path containing training data', required=True)
 	parser.add_argument('--model', help='path to store/read model (when training/testing)', required=True)
 	parser.add_argument('--test', help='enters test mode', action='store_true')
-	parser.add_argument('--batch_size', type=int, default=16)
+	parser.add_argument('--batch_size', type=int, default=64)
 	parser.add_argument("-e", "--epochs", type=int, default=20)
 	parser.add_argument("-emb", "--embedding_size", type=int, default=10)
 	parser.add_argument("-lr", "--lr", type=float, default=.1)
@@ -47,8 +46,9 @@ if __name__ == '__main__':
 
 		for epoch in range(opts.epochs):
 			losses = []
-			for input_indices, output_indices, indices, word_indices in loader:
+			for batch, (input_indices, output_indices, indices, word_indices) in enumerate(loader):
 				losses.append(word2vec.step(input_indices, output_indices, indices, word_indices))
+				if batch % 100 == 0: print(f"   Batch {batch}")
 			print(f"Epoch {epoch:02} - Loss {sum(losses)/len(losses):.3f}")
 
 		word2vec.save(opts.model)
