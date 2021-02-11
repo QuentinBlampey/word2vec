@@ -3,6 +3,7 @@ import argparse
 import pandas as pd
 import numpy as np
 from collections import Counter
+from tqdm import tqdm
 
 from word2vec import Word2Vec
 from dataset import WordPairsDataset, Loader
@@ -30,10 +31,8 @@ if __name__ == '__main__':
 
 	if not opts.test:
 		dataset = WordPairsDataset(opts.text)
-		print('done2')
-		print(dataset.sentences[-1])
+
 		counter = Counter(word for sentence in dataset.sentences for word in sentence)
-		print('done3')
 		vocab = list(counter.keys())
 
 		print(f"> {len(vocab)} words\n")
@@ -46,10 +45,9 @@ if __name__ == '__main__':
 
 		for epoch in range(opts.epochs):
 			losses = []
-			for batch, (input_indices, output_indices, indices, word_indices) in enumerate(loader):
+			for input_indices, output_indices, indices, word_indices in tqdm(loader):
 				losses.append(word2vec.step(input_indices, output_indices, indices, word_indices))
-				if batch % 100 == 0: print(f"   Batch {batch}")
-			print(f"Epoch {epoch:02} - Loss {sum(losses)/len(losses):.3f}")
+			print(f"Epoch {epoch:02} - Loss {sum(losses)/len(losses):.3f}\n")
 
 		word2vec.save(opts.model)
 
