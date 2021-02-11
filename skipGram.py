@@ -28,13 +28,14 @@ if __name__ == '__main__':
 
 	opts = parser.parse_args()
 	print(vars(opts))
-	
+
 	if not opts.test:
 		dataset = WordPairsDataset(opts.text)
-
-		words = reduce(lambda x,y: x+y, dataset.sentences)
-		counter = Counter(words)
-		vocab = set(words)
+		print('done2')
+		print(dataset.sentences[-1])
+		counter = Counter(word for sentence in dataset.sentences for word in sentence)
+		print('done3')
+		vocab = list(counter.keys())
 
 		print(f"> {len(vocab)} words\n")
 
