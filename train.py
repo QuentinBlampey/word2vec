@@ -3,6 +3,8 @@ import argparse
 import json
 from word2vec import Word2Vec
 from dataset import WordPairsDataset, Loader
+from collections import Counter
+import numpy as np
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -16,15 +18,22 @@ if __name__ == "__main__":
 
     dataset = WordPairsDataset(args.data_filename)
 
-    vocab = set(reduce(lambda x,y: x+y, dataset.sentences))
+    words = reduce(lambda x,y: x+y, dataset.sentences)
+    counter = Counter(words)
+    vocab = set(words)
+
     print(f"> {len(vocab)} words\n")
 
 
     word2vec = Word2Vec(vocab, args.embedding_size, learning_rate=args.lr)
-    loader = Loader(dataset, args.batch_size, word2vec.word_to_index)
+
+    probabilities = np.array([counter[word2vec.index_to_word[i]] for i in range(word2vec.vocab_size)])**(3/4)
+    loader = Loader(dataset, args.batch_size, word2vec.word_to_index, probabilities)
 
     for epoch in range(args.epochs):
         losses = []
-        for input_indices, output_indices in loader:
-            losses.append(word2vec.step(input_indices, output_indices))
+        for input_indices, output_indices, indices, word_indices in loader:
+            losses.append(word2vec.step(input_indices, output_indices, indices, word_indices))
         print(f"Epoch {epoch:02} - Loss {sum(losses)/len(losses):.3f}")
+
+    print(word2vec.similarity('a', 'is'))

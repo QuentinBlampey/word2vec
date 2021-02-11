@@ -40,10 +40,14 @@ class WordPairsDataset:
         return self.pairs[index]
 
 class Loader:
-    def __init__(self, dataset, batch_size, word_to_index):
+    def __init__(self, dataset, batch_size, word_to_index, probabilities, n_negative=5):
         self.dataset = dataset
         self.batch_size = batch_size
         self.word_to_index = word_to_index
+        self.probabilities = probabilities
+        self.n_negative = n_negative
+        self.n_words = len(self.word_to_index)
+        self.probabilities = probabilities
         
         self.n_batches = ceil(len(self.dataset) / batch_size)
         self.current_index = 0
@@ -57,11 +61,18 @@ class Loader:
             np.random.shuffle(self.dataset.pairs)
             raise StopIteration
 
-        input_indices, output_indices = [], []
+        input_indices, output_indices, indices, word_indices = [], [], [], np.array([], dtype=int)
         
-        for input_word, output_word in self.dataset[self.current_index:self.current_index+self.batch_size]:
+        for i, (input_word, output_word) in enumerate(self.dataset[self.current_index:self.current_index+self.batch_size]):
             input_indices.append(self.word_to_index[input_word])
-            output_indices.append(self.word_to_index[output_word])
+            output_index = self.word_to_index[output_word]
+            output_indices.append(output_index)
+            indices += [i]*(self.n_negative + 1)
+            p = np.copy(self.probabilities)
+            p[output_index] = 0
+            word_indices = np.concatenate((word_indices, 
+                                           np.random.choice(range(self.n_words), size=self.n_negative, p=p/p.sum(), replace=False)))
+            word_indices = np.concatenate((word_indices, [output_index]))
             
         self.current_index += self.batch_size
-        return np.array(input_indices), np.array(output_indices)
+        return np.array(input_indices), np.array(output_indices), np.array(indices), word_indices
