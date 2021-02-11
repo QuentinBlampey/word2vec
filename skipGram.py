@@ -27,6 +27,7 @@ if __name__ == '__main__':
 	parser.add_argument("-lr", "--lr", type=float, default=.1)
 
 	opts = parser.parse_args()
+	print(vars(opts))
 	
 	if not opts.test:
 		dataset = WordPairsDataset(opts.text)
