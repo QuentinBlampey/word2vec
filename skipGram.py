@@ -22,14 +22,15 @@ if __name__ == '__main__':
 	parser.add_argument('--model', help='path to store/read model (when training/testing)', required=True)
 	parser.add_argument('--test', help='enters test mode', action='store_true')
 	parser.add_argument('--batch_size', type=int, default=64)
-	parser.add_argument("-e", "--epochs", type=int, default=20)
+	parser.add_argument("-e", "--epochs", type=int, default=1)
 	parser.add_argument("-emb", "--embedding_size", type=int, default=10)
 	parser.add_argument("-lr", "--lr", type=float, default=.1)
 
 	opts = parser.parse_args()
-	print(vars(opts))
 
 	if not opts.test:
+		print(vars(opts))
+		
 		dataset = WordPairsDataset(opts.text)
 
 		counter = Counter(word for sentence in dataset.sentences for word in sentence)
