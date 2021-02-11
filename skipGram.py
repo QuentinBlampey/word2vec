@@ -35,7 +35,8 @@ if __name__ == '__main__':
 		counter = Counter(word for sentence in dataset.sentences for word in sentence)
 		vocab = list(counter.keys())
 
-		print(f"> {len(vocab)} words\n")
+		print(f"> {len(vocab)} words")
+		print(f"> {len(dataset.pairs)} pairs\n")
 
 
 		word2vec = Word2Vec(vocab, opts.embedding_size, learning_rate=opts.lr)
