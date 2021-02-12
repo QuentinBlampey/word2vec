@@ -1,6 +1,8 @@
 /data/*
 !/data/.gitkeep
 
+emb.json
+
 # python
 __pycache__
 .ipynb_checkpoints

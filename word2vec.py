@@ -6,7 +6,7 @@ def softmax(array):
     return array / np.sum(array, axis=1, keepdims=True)
 
 class Word2Vec():
-    def __init__(self, vocab, embedding_size=100, learning_rate=.1):
+    def __init__(self, vocab, embedding_size=100, learning_rate=.1, xavier_uniform=True):
         np.random.seed(0)
 
         self.vocab = vocab
@@ -17,8 +17,16 @@ class Word2Vec():
         self.word_to_index = { word: i for i, word in enumerate(self.vocab)}
         self.index_to_word = { i: word for word, i in self.word_to_index.items()}
         
-        self.embedding = np.random.randn(self.vocab_size, self.embedding_size)
-        self.linear = np.random.randn(self.embedding_size, self.vocab_size)
+        if xavier_uniform:
+            self.embedding = self.init_xavier_uniform(self.vocab_size, self.embedding_size)
+            self.linear = self.init_xavier_uniform(self.embedding_size, self.vocab_size)
+        else:
+            self.embedding = np.random.randn(self.vocab_size, self.embedding_size)
+            self.linear = np.random.randn(self.embedding_size, self.vocab_size)
+
+    def init_xavier_uniform(self, in_dim, out_dim):
+        a = np.sqrt(6/(in_dim + out_dim))
+        return np.random.uniform(-a,a,(in_dim, out_dim))
         
     def one_hot_encod(self, output_indices):
         one_hot = np.zeros((len(output_indices), self.vocab_size))
