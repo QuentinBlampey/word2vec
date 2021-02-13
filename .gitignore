@@ -32,3 +32,4 @@ yarn-debug.log*
 yarn-error.log*
 
 1-billion-word-language-modeling-benchmark-r13output/*
+data_bbc/*
