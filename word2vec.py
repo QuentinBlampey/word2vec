@@ -69,7 +69,7 @@ class Word2Vec():
     def load(path):
         with open(path) as f:
             obj = json.load(f)
-            word2vec = Word2Vec([], 0, 0)
+            word2vec = Word2Vec([])
             word2vec.embedding = np.array(obj['embedding'])
             word2vec.word_to_index = obj['word_to_index']
         return word2vec
