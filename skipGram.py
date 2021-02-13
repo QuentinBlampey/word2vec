@@ -8,7 +8,7 @@ from tqdm import tqdm
 from word2vec import Word2Vec
 from dataset import WordPairsDataset, Loader
 
-__authors__ = ['clement_piat','blampey_quentin']
+__authors__ = ['clement_piat','quentin_blampey']
 __emails__  = ['clement.piat@student.ecp.fr', 'quentin.blampey@student.ecp.fr']
 
 def loadPairs(path):
