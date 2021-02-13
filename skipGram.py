@@ -50,7 +50,7 @@ if __name__ == '__main__':
 			losses = []
 			for input_indices, output_indices, indices, word_indices in tqdm(loader):
 				losses.append(word2vec.step(input_indices, output_indices, indices, word_indices))
-			print(losses)
+			# print(losses)
 			print(f"Epoch {epoch:02} - Loss {sum(losses)/len(losses):.3f}\n")
 
 		word2vec.save(opts.model)
